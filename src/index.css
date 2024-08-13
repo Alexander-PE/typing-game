@@ -1,9 +1,45 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Inter, system-ui, monospace, Avenir, Helvetica, Arial, sans-serif;
   color-scheme: light dark;
   --green: #00b755;
   --yellow: #daaf38;
   --red: #ca4754;
   --black: #222;
   --gray: #999;
+}
+
+body {
+  background-color: var(--black);
+  display: grid;
+  justify-content: center;
+  padding: 32px;
+  margin-top: 100px;
+}
+
+section{
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 500px;
+}
+
+time {
+  color: var(--yellow);
+}
+
+input {
+  z-index: -999;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  /* opacity: 0; */
+}
+
+p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  margin: 0;
 }
