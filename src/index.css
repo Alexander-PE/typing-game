@@ -53,7 +53,7 @@ letter {
     color: var(--yellow);
     font-size: 14px;
     position: absolute;
-    left: -65%;
+    left: -30%;
     animation: 1s blink infinite ease-in-out;
   }
 
