@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { words as INITIAL_WORDS } from './constants/data'
+import ReloadIcon from './Icons/ReloadIcon'
 
 function App() {
   const $timeRef = useRef(null)
@@ -9,6 +10,7 @@ function App() {
   const $wpmRef = useRef(null)
   const $accuracyRef = useRef(null)
   const $gameRef = useRef(null)
+  const $buttonRef = useRef(null)
 
   useEffect(() => {
     startGame()
@@ -53,6 +55,12 @@ function App() {
     window.addEventListener('keydown', () => { $inputRef.current.focus() })
     $inputRef.current.addEventListener('keydown', handleKeyDown)
     $inputRef.current.addEventListener('keyup', handleKeyUp)
+    $buttonRef.current.addEventListener('click', () => {
+      $gameRef.current.style.display = 'flex'
+      $resultsRef.current.style.display = 'none'
+      $inputRef.current.value = ''
+      startGame()
+    })
   }
 
   function handleKeyDown(e) {
@@ -137,7 +145,6 @@ function App() {
       $nextActiveLetter.classList.add('active')
     } else {
       $currentLetter.classList.add('active', 'is-last')
-      // TODO: game over si no hay otra palabra
     }
   }
 
@@ -170,6 +177,10 @@ function App() {
 
         <h2>Accuracy:</h2>
         <h3 ref={$accuracyRef}></h3>
+
+        <button ref={$buttonRef}>
+          <ReloadIcon />
+        </button>
       </section>
     </main>
   )
