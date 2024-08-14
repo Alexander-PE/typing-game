@@ -34,7 +34,7 @@ input {
   top: 0;
   left: 0;
   pointer-events: none;
-  /* opacity: 0; */
+  opacity: 0;
 }
 
 p {
@@ -86,4 +86,12 @@ word {
   &.marked {
     border-color: var(--red);
   }
+}
+
+#game {
+  display: flex;
+}
+
+#results {
+  display: none;
 }
