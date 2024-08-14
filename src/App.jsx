@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react'
+import { words as INITIAL_WORDS } from './constants/data'
 import './App.css'
 
 function App() {
@@ -11,7 +12,6 @@ function App() {
     startEvents()
   }, [])
 
-  const text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'
   const initialTime = 30
 
   let words = []
@@ -19,7 +19,7 @@ function App() {
 
 
   function startGame() {
-    words = text.split(' ')
+    words = INITIAL_WORDS.toSorted(() => Math.random() - 0.5).slice(0, 50)
     currentTime = initialTime
 
     $timeRef.current.textContent = currentTime
@@ -75,9 +75,37 @@ function App() {
       $inputRef.current.value = ''
 
       const hasMissedLetter = $currentWord.querySelectorAll('letter:not(.correct)').length > 0
-      
+
       const classToAdd = hasMissedLetter ? 'marked' : 'correct'
       $currentWord.classList.add(classToAdd)
+    }
+
+    if (key === 'Backspace') {
+      const $prevWord = $currentWord.previousElementSibling
+      const $prevLetter = $currentLetter.previousElementSibling
+
+      if (!$prevWord && !$prevLetter) {
+        e.preventDefault()
+        return
+      }
+
+      const $wordMarked = $paragraphRef.current.querySelector('word.marked')
+      if (!$prevLetter && $wordMarked) {
+        e.preventDefault()
+        $prevWord.classList.remove('marked')
+        $prevWord.classList.add('active')
+
+        const $letterToGo = $prevWord.querySelector('letter:last-child')
+
+        $currentLetter.classList.remove('active')
+        $letterToGo.classList.add('active')
+
+        $inputRef.current.value = [
+          ...$prevWord.querySelectorAll('letter.correct, letter.incorrect')
+        ].map($el => {
+          return $el.classList.contains('correct') ? $el.innerText : '*'
+        }).join('')
+      }
     }
   }
   function handleKeyUp() {
@@ -121,6 +149,9 @@ function App() {
         <time ref={$timeRef}></time>
         <p ref={$paragraphRef}></p>
         <input autoFocus ref={$inputRef} />
+      </section>
+      <section id='results'>
+        <h2>WPM</h2>
       </section>
     </main>
   )
