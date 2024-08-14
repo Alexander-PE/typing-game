@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react'
 import { words as INITIAL_WORDS } from './constants/data'
-import './App.css'
 
 function App() {
   const $timeRef = useRef(null)
