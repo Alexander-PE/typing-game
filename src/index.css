@@ -109,3 +109,21 @@ h3 {
   margin: 0;
   color: var(--yellow);
 }
+
+button {
+  background: transparent;
+  border: 0;
+  margin-top: 32px;
+  padding: 8px;
+  opacity: .4;
+  display: inline-block;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  cursor: pointer;
+  border-radius: 16px;
+
+  &:hover {
+    background: #444;
+    opacity: 1;
+    scale: 110%;
+  }
+}
