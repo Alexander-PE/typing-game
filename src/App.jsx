@@ -2,56 +2,125 @@ import { useRef, useEffect } from 'react'
 import './App.css'
 
 function App() {
-  const timeRef = useRef(null)
-  const paragraphRef = useRef(null)
-  const inputRef = useRef(null)
+  const $timeRef = useRef(null)
+  const $paragraphRef = useRef(null)
+  const $inputRef = useRef(null)
 
   useEffect(() => {
     startGame()
     startEvents()
   }, [])
 
-  const initialTime = 30
-
   const text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'
+  const initialTime = 30
 
   let words = []
   let currentTime = initialTime
 
-  const startGame = () => {
+
+  function startGame() {
     words = text.split(' ')
     currentTime = initialTime
 
-    timeRef.current.textContent = currentTime
+    $timeRef.current.textContent = currentTime
 
-    paragraphRef.current.innerHTML = words.map((word, index) => {
+    $paragraphRef.current.innerHTML = words.map((word, index) => {
       const letters = word.split('')
 
       return `<word>
-        ${letters.map(letter => `<letter>${letter}</letter>`).join('')}
-        </word>`
+      ${letters.map(letter => `<letter>${letter}</letter>`).join('')}
+      </word>`
     }).join('')
+
+    const $firstWord = $paragraphRef.current.querySelector('word')
+    $firstWord.classList.add('active')
+    $firstWord.querySelector('letter').classList.add('active')
 
     const intervalId = setInterval(() => {
       currentTime--
-      timeRef.current.textContent = currentTime
+      $timeRef.current.textContent = currentTime
       if (currentTime === 0) {
         clearInterval(intervalId)
         gameOver()
       }
     }, 1000)
+  }
 
+  function startEvents() {
+    window.addEventListener('keydown', () => { $inputRef.current.focus() })
+    $inputRef.current.addEventListener('keydown', handleKeyDown)
+    $inputRef.current.addEventListener('keyup', handleKeyUp)
   }
-  const startEvents = () => { }
-  const gameOver = () => { 
-    alert('Game Over')
+  function gameOver() {
+    console.log('Game Over')
   }
+
+  function handleKeyDown(e) {
+    const $currentWord = $paragraphRef.current.querySelector('word.active')
+    const $currentLetter = $currentWord.querySelector('letter.active')
+
+    const { key } = e
+    if (key === ' ') {
+      e.preventDefault()
+
+      const $nextWord = $currentWord.nextElementSibling
+      const $nextLetter = $nextWord.querySelector('letter')
+
+      $currentWord.classList.remove('active', 'marked')
+      $currentLetter.classList.remove('active')
+
+      $nextWord.classList.add('active')
+      $nextLetter.classList.add('active')
+
+      $inputRef.current.value = ''
+
+      const hasMissedLetter = $currentWord.querySelectorAll('letter:not(.correct)').length > 0
+      
+      const classToAdd = hasMissedLetter ? 'marked' : 'correct'
+      $currentWord.classList.add(classToAdd)
+    }
+  }
+  function handleKeyUp() {
+    const $currentWord = $paragraphRef.current.querySelector('word.active')
+    const $currentLetter = $currentWord.querySelector('letter.active')
+
+    const currentWord = $currentWord.innerText.trim()
+    $inputRef.current.maxLength = currentWord.length
+
+    console.log({ value: $inputRef.current.value, currentWord })
+
+    const $allLetters = $currentWord.querySelectorAll('letter')
+
+    $allLetters.forEach($letter => $letter.classList.remove('correct', 'incorrect'))
+
+    $inputRef.current.value.split('').forEach((char, index) => {
+      const $letter = $allLetters[index]
+      const letterToCheck = currentWord[index]
+
+      const isCorrect = char === letterToCheck
+      const letterClass = isCorrect ? 'correct' : 'incorrect'
+
+      $letter.classList.add(letterClass)
+    })
+
+    $currentLetter.classList.remove('active')
+    const inputLength = $inputRef.current.value.length
+    const $nextActiveLetter = $allLetters[inputLength]
+
+    if ($nextActiveLetter) {
+      $nextActiveLetter.classList.add('active')
+    } else {
+      $currentLetter.classList.add('active', 'is-last')
+      // TODO: game over si no hay otra palabra
+    }
+  }
+
   return (
     <main>
       <section id='game'>
-        <time ref={timeRef}></time>
-        <p ref={paragraphRef}></p>
-        <input autoFocus ref={inputRef} />
+        <time ref={$timeRef}></time>
+        <p ref={$paragraphRef}></p>
+        <input autoFocus ref={$inputRef} />
       </section>
     </main>
   )
