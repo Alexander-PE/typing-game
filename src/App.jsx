@@ -152,7 +152,7 @@ function App() {
     const totalLetters = correctLetters + incorrectLetters
     const acuracy = totalLetters > 0 ? (correctLetters / totalLetters) * 100 : 0
 
-    const wpm = correctWords * 60 / 10
+    const wpm = correctWords * 60 / initialTime
     $wpmRef.current.textContent = wpm
     $accuracyRef.current.textContent = `${acuracy.toFixed(2)}%`
   }
