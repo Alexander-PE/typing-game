@@ -6,6 +6,10 @@ function App() {
   const $timeRef = useRef(null)
   const $paragraphRef = useRef(null)
   const $inputRef = useRef(null)
+  const $resultsRef = useRef(null)
+  const $wpmRef = useRef(null)
+  const $accuracyRef = useRef(null)
+  const $gameRef = useRef(null)
 
   useEffect(() => {
     startGame()
@@ -50,9 +54,6 @@ function App() {
     window.addEventListener('keydown', () => { $inputRef.current.focus() })
     $inputRef.current.addEventListener('keydown', handleKeyDown)
     $inputRef.current.addEventListener('keyup', handleKeyUp)
-  }
-  function gameOver() {
-    console.log('Game Over')
   }
 
   function handleKeyDown(e) {
@@ -115,8 +116,6 @@ function App() {
     const currentWord = $currentWord.innerText.trim()
     $inputRef.current.maxLength = currentWord.length
 
-    console.log({ value: $inputRef.current.value, currentWord })
-
     const $allLetters = $currentWord.querySelectorAll('letter')
 
     $allLetters.forEach($letter => $letter.classList.remove('correct', 'incorrect'))
@@ -143,15 +142,35 @@ function App() {
     }
   }
 
+  function gameOver() {
+    $gameRef.current.style.display = 'none'
+    $resultsRef.current.style.display = 'flex'
+
+    const correctWords = $paragraphRef.current.querySelectorAll('word.correct').length
+    const correctLetters = $paragraphRef.current.querySelectorAll('letter.correct').length
+    const incorrectLetters = $paragraphRef.current.querySelectorAll('letter.incorrect').length
+
+    const totalLetters = correctLetters + incorrectLetters
+    const acuracy = totalLetters > 0 ? (correctLetters / totalLetters) * 100 : 0
+
+    const wpm = correctWords * 60 / 10
+    $wpmRef.current.textContent = wpm
+    $accuracyRef.current.textContent = `${acuracy.toFixed(2)}%`
+  }
+
   return (
     <main>
-      <section id='game'>
+      <section id='game' ref={$gameRef}>
         <time ref={$timeRef}></time>
         <p ref={$paragraphRef}></p>
         <input autoFocus ref={$inputRef} />
       </section>
-      <section id='results'>
-        <h2>WPM</h2>
+      <section id='results' ref={$resultsRef}>
+        <h2>WPM:</h2>
+        <h3 ref={$wpmRef}></h3>
+
+        <h2>Accuracy:</h2>
+        <h3 ref={$accuracyRef}></h3>
       </section>
     </main>
   )
