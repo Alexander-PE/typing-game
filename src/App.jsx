@@ -11,23 +11,35 @@ function App() {
   const $accuracyRef = useRef(null)
   const $gameRef = useRef(null)
   const $buttonRef = useRef(null)
+  const timerIntervalRef = useRef(null)
+  const currentTimeRef = useRef(30)
 
   useEffect(() => {
     startGame()
     startEvents()
+    return () => {
+      if (timerIntervalRef.current != null) {
+        clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
+      }
+    }
   }, [])
 
   const initialTime = 30
 
   let words = []
-  let currentTime = initialTime
 
 
   function startGame() {
-    words = INITIAL_WORDS.toSorted(() => Math.random() - 0.5).slice(0, 50)
-    currentTime = initialTime
+    if (timerIntervalRef.current != null) {
+      clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
 
-    $timeRef.current.textContent = currentTime
+    words = INITIAL_WORDS.toSorted(() => Math.random() - 0.5).slice(0, 50)
+    currentTimeRef.current = initialTime
+
+    $timeRef.current.textContent = currentTimeRef.current
 
     $paragraphRef.current.innerHTML = words.map((word, index) => {
       const letters = word.split('')
@@ -41,11 +53,12 @@ function App() {
     $firstWord.classList.add('active')
     $firstWord.querySelector('letter').classList.add('active')
 
-    const intervalId = setInterval(() => {
-      currentTime--
-      $timeRef.current.textContent = currentTime
-      if (currentTime === 0) {
-        clearInterval(intervalId)
+    timerIntervalRef.current = setInterval(() => {
+      currentTimeRef.current--
+      $timeRef.current.textContent = currentTimeRef.current
+      if (currentTimeRef.current <= 0) {
+        clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
         gameOver()
       }
     }, 1000)
@@ -72,6 +85,10 @@ function App() {
       e.preventDefault()
 
       const $nextWord = $currentWord.nextElementSibling
+      if (!$nextWord) {
+        return
+      }
+
       const $nextLetter = $nextWord.querySelector('letter')
 
       $currentWord.classList.remove('active', 'marked')
@@ -97,10 +114,12 @@ function App() {
         return
       }
 
-      const $wordMarked = $paragraphRef.current.querySelector('word.marked')
-      if (!$prevLetter && $wordMarked) {
+      const inputEmpty = $inputRef.current.value === ''
+      if (!$prevLetter && $prevWord && inputEmpty) {
         e.preventDefault()
-        $prevWord.classList.remove('marked')
+        $currentWord.classList.remove('active')
+
+        $prevWord.classList.remove('marked', 'correct')
         $prevWord.classList.add('active')
 
         const $letterToGo = $prevWord.querySelector('letter:last-child')
@@ -111,7 +130,7 @@ function App() {
         $inputRef.current.value = [
           ...$prevWord.querySelectorAll('letter.correct, letter.incorrect')
         ].map($el => {
-          return $el.classList.contains('correct') ? $el.innerText : '*'
+          return $el.classList.contains('correct') ? $el.textContent : '*'
         }).join('')
       }
     }
@@ -149,6 +168,11 @@ function App() {
   }
 
   function gameOver() {
+    if (timerIntervalRef.current != null) {
+      clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
+
     $gameRef.current.style.display = 'none'
     $resultsRef.current.style.display = 'flex'
 
@@ -159,8 +183,9 @@ function App() {
     const totalLetters = correctLetters + incorrectLetters
     const acuracy = totalLetters > 0 ? (correctLetters / totalLetters) * 100 : 0
 
-    const wpm = correctWords * 60 / initialTime
-    $wpmRef.current.textContent = wpm
+    const elapsedMinutes = initialTime / 60
+    const wpm = elapsedMinutes > 0 ? correctWords / elapsedMinutes : 0
+    $wpmRef.current.textContent = wpm.toFixed(1)
     $accuracyRef.current.textContent = `${acuracy.toFixed(2)}%`
   }
 
